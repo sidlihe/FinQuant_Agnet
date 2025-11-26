@@ -1,0 +1,7 @@
+langchain-google-genai
+langchain-core
+langgraph
+python-dotenv
+pandas
+tabulate
+yfinance

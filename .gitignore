@@ -1,0 +1,19 @@
+# Logs
+logs/
+*.log
+
+# Virtual environments
+venv/
+.env 
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE/project files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
