@@ -17,3 +17,8 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+#info
+info_json/
+chromedriver-win64/
+outputs/

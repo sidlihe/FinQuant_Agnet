@@ -1,9 +1,9 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/ec559a9f6bfd399b82bb44393651661b08aaf7ba/icons/folder-markdown-open.svg" align="center" width="30%">
 </p>
-<p align="center"><h1 align="center">FINQUANT_AGNET.GIT</h1></p>
+<p align="center"><h1 align="center">FINQUANT AGENT</h1></p>
 <p align="center">
-	<em><code>❯ REPLACE-ME</code></em>
+	<em><code>Terminal-first Screener + Gemini research copilot</code></em>
 </p>
 <p align="center">
 	<img src="https://img.shields.io/github/license/sidlihe/FinQuant_Agnet.git?style=default&logo=opensourceinitiative&logoColor=white&color=00e0ff" alt="license">
@@ -38,33 +38,36 @@
 
 ##  Overview
 
-<code>❯ REPLACE-ME</code>
+FinQuant Agent marries deterministic Screener.in scraping, yfinance technicals, and Gemini reasoning to deliver human-grade trading advice. Enter a casual stock name (e.g., “niva bupa”), the agent resolves the exact Screener slug + NSE ticker, scrapes fundamentals, saves everything to disk, and finally asks Gemini to craft a personalized action plan depending on whether you already own the stock.
 
 ---
 
 ##  Features
 
-<code>❯ REPLACE-ME</code>
+- Deterministic alias resolver that maps colloquial names to Screener + NSE tickers.
+- Headless Selenium scraper that exports structured JSON snapshots per company.
+- yfinance-based technical summary with volatility stats and markdown export.
+- Personalized Gemini verdict that adapts to the user’s holding status.
+- CLI workflow that logs everything, persists outputs, and is resilient to transient failures.
 
 ---
 
 ##  Project Structure
 
-```sh
-└── FinQuant_Agnet.git/
-    ├── main.py
-    ├── outputs
-    │   ├── NIVABUPA_NS_report.md
-    │   └── RVNL.NS_analysis.md
-    ├── requirement.txt
-    └── src
-        ├── __init__.py
-        ├── config.py
-        ├── logger.py
-        ├── nodes.py
-        ├── state.py
-        ├── tools.py
-        └── workflow.py
+```text
+Gemini-Retail-Agent/
+├── main.py
+├── outputs/
+├── info_json/
+├── requirement.txt
+└── src
+    ├── scraper/
+    ├── tools.py
+    ├── workflow.py
+    ├── nodes.py
+    ├── config.py
+    ├── state.py
+    └── logger.py
 ```
 
 
@@ -77,11 +80,11 @@
 			<table>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/requirement.txt'>requirement.txt</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>Runtime dependencies</code></td>
 			</tr>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/main.py'>main.py</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>Interactive CLI entrypoint</code></td>
 			</tr>
 			</table>
 		</blockquote>
@@ -92,27 +95,27 @@
 			<table>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/logger.py'>logger.py</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>Central logging configuration</code></td>
 			</tr>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/config.py'>config.py</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>Env + directory helpers</code></td>
 			</tr>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/workflow.py'>workflow.py</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>LangGraph assembly</code></td>
 			</tr>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/tools.py'>tools.py</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>Deterministic tools + helpers</code></td>
 			</tr>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/nodes.py'>nodes.py</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>Gemini node + bindings</code></td>
 			</tr>
 			<tr>
 				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/state.py'>state.py</a></b></td>
-				<td><code>❯ REPLACE-ME</code></td>
+				<td><code>LangGraph AgentState</code></td>
 			</tr>
 			</table>
 		</blockquote>
@@ -131,33 +134,37 @@ Before getting started with FinQuant_Agnet.git, ensure your runtime environment 
 
 ###  Installation
 
-Install FinQuant_Agnet.git using one of the following methods:
-
-**Build from source:**
-
-1. Clone the FinQuant_Agnet.git repository:
 ```sh
-❯ git clone https://github.com/sidlihe/FinQuant_Agnet.git
+git clone https://github.com/sidlihe/FinQuant_Agnet.git
+cd FinQuant_Agnet.git
+python -m venv venv
+# Linux/macOS
+source venv/bin/activate
+# Windows
+# .\venv\Scripts\activate
+pip install -r requirement.txt
+cp .env.example .env  # set GOOGLE_API_KEY and optional CHROMEDRIVER_PATH
 ```
-
-2. Navigate to the project directory:
-```sh
-❯ cd FinQuant_Agnet.git
-```
-
-3. Install the project dependencies:
-
-echo 'INSERT-INSTALL-COMMAND-HERE'
-
-
 
 ###  Usage
-Run FinQuant_Agnet.git using the following command:
-echo 'INSERT-RUN-COMMAND-HERE'
+
+```sh
+python main.py
+```
+
+1. Type any Indian stock/casual alias when prompted.
+2. Confirm the detected Screener + NSE ticker (override if needed).
+3. Answer whether you already own the stock.
+4. Read/save the personalized verdict in `outputs/`; raw JSON goes to `info_json/`.
 
 ###  Testing
-Run the test suite using the following command:
-echo 'INSERT-TEST-COMMAND-HERE'
+
+Smoke check imports and Selenium wiring:
+
+```sh
+python -m compileall src
+python src/tools.py  # optional: runs the stock verdict tool in debug mode
+```
 
 ---
 ##  Project Roadmap

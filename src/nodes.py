@@ -18,6 +18,7 @@ from logger import logger
 # Initialize Gemini LLM (2025-Ready)
 # ===================================================================
 try:
+    Config.require_api_key()
     # Auto-fix outdated model names
     if Config.MODEL_NAME in ["gemini-1.5-flash", "gemini-1.5-pro"]:
         fixed = Config.MODEL_NAME + "-latest"

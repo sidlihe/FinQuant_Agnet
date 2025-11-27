@@ -15,9 +15,16 @@ class Config:
         if not os.path.exists(Config.OUTPUT_DIR):
             os.makedirs(Config.OUTPUT_DIR)
 
-if not Config.GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_API_KEY missing.")
+    @staticmethod
+    def require_api_key():
+        if not Config.GOOGLE_API_KEY:
+            raise EnvironmentError(
+                "GOOGLE_API_KEY missing. Set it in your environment or .env file."
+            )
 
 if __name__ == "__main__":
-    if Config.GOOGLE_API_KEY:
+    try:
+        Config.require_api_key()
         logger.info("Successfully connected to Gemini API!")
+    except EnvironmentError as exc:
+        logger.error(str(exc))
