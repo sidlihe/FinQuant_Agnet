@@ -1,5 +1,4 @@
-#src/workflow.py
-# src/workflow.py
+# workflow.py - UPDATED
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -7,19 +6,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode, tools_condition
 from src.state import AgentState
-from src.nodes import call_model_node
+from src.nodes import call_model_node  # CHANGED: import from simple_nodes
 from src.tools import COMPLEX_TOOLS
 from logger import logger
 
-
-# ===================================================================
-# Build the Full LangGraph Agent Workflow
-# ===================================================================
 def build_graph():
-    """
-    Builds and returns a compiled LangGraph workflow:
-    START → agent → (tools → agent)* → END
-    """
     logger.info("Building LangGraph workflow...")
 
     workflow = StateGraph(AgentState)
@@ -30,21 +21,17 @@ def build_graph():
 
     # Edges
     workflow.add_edge(START, "agent")
-    workflow.add_edge("tools", "agent")                # After tool execution → back to agent
+    workflow.add_edge("tools", "agent")
 
-    # Conditional edge: decides whether to call tools or finish
+    # Conditional edge
     workflow.add_conditional_edges(
         source="agent",
-        path=tools_condition,          # returns "tools" or END
+        path=tools_condition,
         path_map={"tools": "tools", END: END}
     )
 
     graph = workflow.compile()
-
     logger.info("LangGraph workflow built and compiled successfully!")
-    logger.info(f"   • Nodes: agent, tools")
-    logger.info(f"   • Tools registered: {', '.join(t.name for t in COMPLEX_TOOLS)}")
-
     return graph
 
 

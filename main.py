@@ -1,170 +1,255 @@
-# main.py → FINAL PROFESSIONAL VERSION (WITH USER HOLDING LOGIC)
-
+# main.py - PROFESSIONAL WORKING VERSION
 import os
 import sys
 import json
+import re
 from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from langchain_core.messages import HumanMessage
-
 from logger import logger
 from src.config import Config
-from src.tools import (
-    resolve_stock_identity_local,
-    build_stock_verdict_payload,
-)
-from src.workflow import build_graph
+from src.tools import resolve_stock_identity_local, ultimate_stock_verdict
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage
 
+def clear_folders():
+    """Clear previous analysis files"""
+    folders = ["./info_json", "./outputs"]
+    for folder in folders:
+        if not os.path.exists(folder):
+            continue
+        try:
+            for file in os.listdir(folder):
+                if file.endswith(('.json', '.md')):
+                    os.remove(os.path.join(folder, file))
+        except Exception as e:
+            logger.error(f"Failed to clear {folder}: {e}")
 
 def ask_user(prompt: str) -> str:
-    return input(f"{prompt.strip()} ").strip()
-
+    return input(f"{prompt} ").strip()
 
 def ask_yes_no(prompt: str) -> bool:
     while True:
-        ans = input(f"{prompt.strip()} (y/n): ").strip().lower()
-        if ans in {"y", "yes"}:
+        ans = input(f"{prompt} (y/n): ").strip().lower()
+        if ans in {"y", "yes", "1", "yep"}:
             return True
-        if ans in {"n", "no"}:
+        if ans in {"n", "no", "0", "nope"}:
             return False
-        print("Please respond with 'y' or 'n'.")
+        print("Please type y or n")
 
+def ask_float(prompt: str) -> float:
+    while True:
+        val = input(f"{prompt} ").strip().replace("₹", "").replace(",", "")
+        try:
+            return float(val)
+        except:
+            print("Enter a valid number (e.g. 135.5)")
 
-def prompt_stock_name() -> str:
-    print("\nWhich stock should I analyze today?")
-    print("Examples: irctc, irfc, niva bupa, nalco, tcs, adani power")
-    return ask_user("Stock name:")
+def get_recommendation_llm():
+    """Initialize LLM for professional recommendations"""
+    try:
+        Config.require_api_key()
+        llm = ChatGoogleGenerativeAI(
+            model=Config.MODEL_NAME,
+            temperature=0.0,
+            google_api_key=Config.GOOGLE_API_KEY,
+            convert_system_message_to_human=True,
+            max_retries=2
+        )
+        return llm
+    except Exception as e:
+        logger.error(f"LLM init failed: {e}")
+        return None
 
+def generate_professional_recommendation(stock_data: dict, owns_stock: bool, buy_price: float = 0) -> str:
+    """Generate professional fund manager-style recommendation"""
+    
+    llm = get_recommendation_llm()
+    if not llm:
+        return "Error: Cannot initialize recommendation engine"
+    
+    # Extract data
+    technical_report = stock_data.get('technical_report', '')
+    fundamental = stock_data.get('fundamental_snapshot', '')
+    metadata = stock_data.get('metadata', {})
+    
+    # Parse current price
+    current_price = 0
+    price_match = re.search(r"Today['']?s?\s+Open\s*:\s*₹?\s*([0-9,]+\.?[0-9]*)", technical_report, re.IGNORECASE)
+    if price_match:
+        current_price = float(price_match.group(1).replace(",", ""))
+    
+    # Professional prompt for fund manager style
+    if owns_stock and buy_price > 0:
+        pl_percent = ((current_price - buy_price) / buy_price * 100) if current_price > 0 else 0
+        pl_status = "PROFIT" if pl_percent > 0 else "LOSS"
+        
+        prompt = f"""
+ACT AS A RUTHLESS FUND MANAGER. Analyze this holding and give brutal, no-nonsense advice.
+
+📊 POSITION ANALYSIS:
+- Stock: {metadata.get('company_name', 'N/A')} 
+- Current: ₹{current_price:,.2f} | Your Buy: ₹{buy_price:,.2f}
+- P/L: {pl_percent:+.1f}% ({pl_status})
+- Holding: EXISTING POSITION
+
+📈 TECHNICALS:
+{technical_report}
+
+🏛️  FUNDAMENTALS:
+{fundamental}
+
+🎯 REQUIRED FORMAT - BE SPECIFIC:
+
+**PORTFOLIO DECISION** → HOLD | BOOK PROFIT | CUT LOSS | AVERAGE DOWN
+
+**CONFIDENCE** → High (80%+) | Medium (60-80%) | Low (<60%)
+
+**ACTION PLAN**:
+- Immediate Action: [HOLD/EXIT/AVERAGE]
+- Stop Loss: ₹_____ (____% risk)
+- Price Target: ₹_____ (____% upside)
+- Time Horizon: [1-3 months | 3-6 months | 6-12 months]
+
+**QUANTITATIVE RATIONALE**:
+1. [Technical reason with numbers]
+2. [Fundamental reason with metrics] 
+3. [Risk/reward assessment]
+
+**RISK RATING** → Low | Medium | High
+
+**PRIORITY** → High Priority | Medium Priority | Low Priority
+
+Use exact numbers from data. No fluff. Be brutally honest about the position."""
+    else:
+        prompt = f"""
+ACT AS A RUTHLESS FUND MANAGER. Analyze this stock and give brutal, no-nonsense entry advice.
+
+📊 STOCK ANALYSIS:
+- Stock: {metadata.get('company_name', 'N/A')}
+- Current Price: ₹{current_price:,.2f}
+- Position: NEW ENTRY
+
+📈 TECHNICALS:
+{technical_report}
+
+🏛️  FUNDAMENTALS:
+{fundamental}
+
+🎯 REQUIRED FORMAT - BE SPECIFIC:
+
+**ENTRY DECISION** → STRONG BUY | BUY | NEUTRAL | AVOID | STRONG SELL
+
+**CONFIDENCE** → High (80%+) | Medium (60-80%) | Low (<60%)
+
+**ENTRY STRATEGY**:
+- Buy Zone: ₹_____ - ₹_____ 
+- Stop Loss: ₹_____ (____% risk)
+- Target: ₹_____ (____% upside)
+- Position Size: [Full | Half | Quarter]
+- Time Horizon: [1-3 months | 3-6 months | 6-12 months]
+
+**QUANTITATIVE RATIONALE**:
+1. [Technical setup with numbers]
+2. [Fundamental strength/weakness with metrics]
+3. [Market timing assessment]
+
+**RISK RATING** → Low | Medium | High
+
+**PRIORITY** → High Priority | Medium Priority | Low Priority
+
+Use exact numbers from data. No fluff. Be brutally honest about the opportunity."""
+    
+    try:
+        response = llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+    except Exception as e:
+        return f"Error generating recommendation: {e}"
+
+def display_welcome():
+    """Professional welcome banner"""
+    print("\n" + "═" * 80)
+    print("           🏛️  FINQUANT PRO - PROFESSIONAL FUND MANAGER AI")
+    print("═" * 80)
+    print("   Institutional-Grade Analysis • Brutally Honest • Data-Driven")
+    print("═" * 80)
 
 def main():
     Config.ensure_dirs()
-    logger.info("=" * 90)
-    logger.info("FINQUANT PRO v5.0 — THE REAL FUND MANAGER WITH PERSONAL ADVICE")
-    logger.info("Now asks if you own the stock & gives perfect SL/Target/Entry")
-    logger.info("=" * 90)
-
-    print("\nWelcome to FinQuant Pro v5.0")
-    print("India's smartest stock verdict engine — now with PERSONAL advice!")
-    print("Type any stock name, or 'quit' to exit.")
-
-    app = build_graph()
-
+    clear_folders()
+    
+    display_welcome()
+    
     while True:
         try:
-            user_input = prompt_stock_name()
-            if user_input.lower() in {"quit", "exit", "bye", "q", "end", "stop"}:
-                print("\nThank you! All reports saved in outputs/ folder")
-                logger.info("Session ended")
+            print("\n📈 STOCK ANALYSIS MENU")
+            print("────────────────────────────────────────────────────────────────")
+            user_input = ask_user("Enter stock name (or 'quit' to exit):").strip()
+            
+            if user_input.lower() in {"quit", "exit", "q"}:
+                print("\n🎯 Analysis complete. Check outputs/ folder for detailed reports.")
                 break
-            if not user_input:
-                continue
 
-            logger.info(f"User query → {user_input}")
-            try:
-                identity = resolve_stock_identity_local(user_input)
-            except ValueError as exc:
-                print(f"Could not understand that stock name → {exc}")
-                continue
+            # Step 1: Stock Identification
+            print("\n🔍 Identifying stock...")
+            identity = resolve_stock_identity_local(user_input)
+            print(f"✅ Identified: {identity['screener_name']} | {identity['yfinance_ticker']}")
+            
+            if not ask_yes_no("Proceed with this stock?"):
+                identity["screener_name"] = ask_user("Enter correct name:") or identity["screener_name"]
+                identity["yfinance_ticker"] = ask_user("Enter correct ticker:") or identity["yfinance_ticker"]
 
-            print(
-                f"\nDetected Screener: {identity['screener_name']} | "
-                f"yfinance ticker: {identity['yfinance_ticker']}"
-            )
+            # Step 2: Data Collection
+            print("\n📊 Collecting market data...")
+            tool_result = ultimate_stock_verdict.invoke({
+                "screener_name": identity["screener_name"],
+                "yfinance_ticker": identity["yfinance_ticker"]
+            })
+            stock_data = json.loads(tool_result)
+            print("✅ Data collection complete")
 
-            if not ask_yes_no("Use these identifiers?"):
-                identity["screener_name"] = ask_user("Enter exact Screener name:") or identity["screener_name"]
-                identity["yfinance_ticker"] = ask_user("Enter yfinance ticker (e.g., IRFC.NS):") or identity["yfinance_ticker"]
+            # Step 3: Position Analysis
+            owns_stock = ask_yes_no("\n💼 Do you currently hold this stock?")
+            buy_price = 0
+            if owns_stock:
+                buy_price = ask_float("Enter your average buy price (₹):")
 
-            print("\nFetching full Screener + technical data... (may take ~30s)")
-            try:
-                payload = build_stock_verdict_payload(
-                    identity["screener_name"], identity["yfinance_ticker"]
-                )
-                tool_response = json.dumps(payload, indent=2, ensure_ascii=False)
-                print("Data downloaded successfully!")
-                if payload.get("saved_files"):
-                    print("Saved raw fundamentals →")
-                    for path in payload["saved_files"]:
-                        print(f"   • {path}")
-            except Exception as exc:
-                logger.error(f"ultimate_stock_verdict failed: {exc}")
-                print(f"Could not fetch data: {exc}")
-                continue
+            # Step 4: Professional Analysis
+            print("\n🤔 Generating professional recommendation...")
+            recommendation = generate_professional_recommendation(stock_data, owns_stock, buy_price)
+            
+            # Display results
+            print("\n" + "═" * 80)
+            print("                    🎯 PROFESSIONAL VERDICT")
+            print("═" * 80)
+            print(recommendation)
+            print("═" * 80)
 
-            owns = ask_yes_no("\nDo you already own this stock?")
+            # Step 5: Save professional report
+            safe_name = "".join(c if c.isalnum() else "_" for c in user_input.upper())
+            status = "HOLDING" if owns_stock else "ANALYSIS"
+            timestamp = datetime.now().strftime('%d-%b-%Y_%H%M')
+            filename = f"outputs/{safe_name}_{status}_{timestamp}.md"
+            
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(f"# PROFESSIONAL STOCK ANALYSIS: {user_input.upper()}\n")
+                f.write(f"# Analysis Date: {datetime.now().strftime('%d %B %Y %H:%M')}\n")
+                f.write(f"# Position: {'EXISTING HOLDER' if owns_stock else 'NEW ENTRY ANALYSIS'}\n")
+                if owns_stock:
+                    f.write(f"# Average Buy Price: ₹{buy_price:,.2f}\n")
+                f.write(f"# Generated by: FinQuant Pro AI Fund Manager\n")
+                f.write("\n" + "=" * 80 + "\n\n")
+                f.write(recommendation)
+            
+            print(f"\n💾 Professional report saved: {filename}")
+            print("────────────────────────────────────────────────────────────────")
 
-            final_prompt = f"""
-You are India's top independent equity analyst.
-
-User asked about: "{user_input}"
-User already owns the stock: {"YES" if owns else "NO"}
-
-Here is full data:
-{tool_response}
-
-Give PERSONAL advice in this exact format:
-
-**Personal Recommendation**: 
-   - If user owns: Hold | Book Profit | Book Loss | Average Down | Sell Immediately
-   - If user does NOT own: Strong Buy | Buy | Avoid Entry
-
-**Confidence**: High | Medium | Low
-
-**Suggested Action**:
-   - If owns: "Hold and wait" or "Book loss at ₹___" or "Average at ₹___"
-   - If not owns: "Buy at ₹___" or "Avoid entry above ₹___"
-
-**Target Price**: ₹____ – ₹____
-**Stop Loss**: ₹____
-**Time Horizon**: Short term | Medium term | Long term
-
-**Key Positives** (3):
-- ...
-
-**Key Risks** (3):
-- ...
-
-**One-Line Summary**: ...
-
-Be honest. Be practical. Use real numbers from the data.
-"""
-
-            print("\nGenerating your PERSONAL advice...")
-            final_inputs = {"messages": [HumanMessage(content=final_prompt)]}
-            final_verdict = None
-
-            for event in app.stream(final_inputs, stream_mode="values"):
-                msg = event["messages"][-1]
-                if msg.type == "ai" and not hasattr(msg, "tool_calls"):
-                    final_verdict = msg.content
-                    print("\n" + "=" * 85)
-                    print("           YOUR PERSONAL STOCK VERDICT")
-                    print("=" * 85)
-                    print(final_verdict)
-                    print("=" * 85 + "\n")
-
-            if final_verdict:
-                safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in user_input)[:25]
-                own_status = "OWNED" if owns else "NOT_OWNED"
-                filename = f"outputs/{safe_name.upper()}_{own_status}_VERDICT_{datetime.now().strftime('%d-%m-%Y_%H%M')}.md"
-                with open(filename, "w", encoding="utf-8") as f:
-                    f.write(f"# PERSONAL VERDICT: {user_input.upper()}\n")
-                    f.write(f"# Owns stock: {'YES' if owns else 'NO'}\n")
-                    f.write(f"# Generated: {datetime.now().strftime('%d %B %Y, %I:%M %p')}\n\n")
-                    f.write(final_verdict)
-                print(f"Personal verdict saved → {filename}\n")
-
-            print("─" * 90 + "\n")
-
-        except KeyboardInterrupt:
-            print("\n\nGoodbye!")
-            break
         except Exception as e:
-            logger.error(f"Error: {e}")
-            print("Temporary issue. Try again.")
-
+            logger.error(f"Analysis error: {e}")
+            print(f"❌ Analysis error: {e}")
+            print("🔄 Restarting analysis...\n")
+            continue
 
 if __name__ == "__main__":
     main()
