@@ -1,9 +1,9 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/PKief/vscode-material-icon-theme/ec559a9f6bfd399b82bb44393651661b08aaf7ba/icons/folder-markdown-open.svg" align="center" width="30%">
 </p>
-<p align="center"><h1 align="center">FINQUANT AGENT</h1></p>
+<p align="center"><h1 align="center">FINQUANT PRO</h1></p>
 <p align="center">
-	<em><code>Terminal-first Screener + Gemini research copilot</code></em>
+	<em><code>Your AI Fund Manager - Brutally Honest Stock Advice</code></em>
 </p>
 <p align="center">
 	<img src="https://img.shields.io/github/license/sidlihe/FinQuant_Agnet.git?style=default&logo=opensourceinitiative&logoColor=white&color=00e0ff" alt="license">
@@ -11,221 +11,99 @@
 	<img src="https://img.shields.io/github/languages/top/sidlihe/FinQuant_Agnet.git?style=default&color=00e0ff" alt="repo-top-language">
 	<img src="https://img.shields.io/github/languages/count/sidlihe/FinQuant_Agnet.git?style=default&color=00e0ff" alt="repo-language-count">
 </p>
-<p align="center"><!-- default option, no dependency badges. -->
-</p>
 <p align="center">
-	<!-- default option, no dependency badges. -->
+	<img src="https://img.shields.io/badge/Python-3.8%2B-blue" alt="python">
+	<img src="https://img.shields.io/badge/Stock%20Analysis-AI%20Powered-green" alt="ai">
+	<img src="https://img.shields.io/badge/Recommendations-Data%20Driven-orange" alt="data-driven">
 </p>
 <br>
 
-##  Table of Contents
+## 🚀 What is FinQuant Pro?
 
-- [ Overview](#-overview)
-- [ Features](#-features)
-- [ Project Structure](#-project-structure)
-  - [ Project Index](#-project-index)
-- [ Getting Started](#-getting-started)
-  - [ Prerequisites](#-prerequisites)
-  - [ Installation](#-installation)
-  - [ Usage](#-usage)
-  - [ Testing](#-testing)
-- [ Project Roadmap](#-project-roadmap)
-- [ Contributing](#-contributing)
-- [ License](#-license)
-- [ Acknowledgments](#-acknowledgments)
+**FinQuant Pro is your personal AI fund manager** that gives you brutally honest, data-driven stock advice. Just type any Indian stock name and get institutional-grade analysis with clear **BUY/HOLD/SELL** recommendations.
+
+### 🎯 Real Examples - See It Working
+
+**For Stock You OWN:**
+
 
 ---
 
-##  Overview
+## ✨ Why Use FinQuant Pro?
 
-FinQuant Agent marries deterministic Screener.in scraping, yfinance technicals, and Gemini reasoning to deliver human-grade trading advice. Enter a casual stock name (e.g., “niva bupa”), the agent resolves the exact Screener slug + NSE ticker, scrapes fundamentals, saves everything to disk, and finally asks Gemini to craft a personalized action plan depending on whether you already own the stock.
-
----
-
-##  Features
-
-- Deterministic alias resolver that maps colloquial names to Screener + NSE tickers.
-- Headless Selenium scraper that exports structured JSON snapshots per company.
-- yfinance-based technical summary with volatility stats and markdown export.
-- Personalized Gemini verdict that adapts to the user’s holding status.
-- CLI workflow that logs everything, persists outputs, and is resilient to transient failures.
+| Feature | Benefit |
+|---------|---------|
+| **🤖 AI-Powered Analysis** | Get fund manager-level insights without the fees |
+| **📊 Real Data** | Live fundamentals from Screener + technicals from Yahoo Finance |
+| **🎯 Clear Recommendations** | Specific BUY/HOLD/SELL advice with exact price targets |
+| **💼 Personalized** | Different advice if you own the stock vs new investment |
+| **📈 Risk Assessment** | Understand the risks before you invest |
+| **💾 Professional Reports** | Save all analysis for future reference |
 
 ---
 
-##  Project Structure
+## 🛠️ How It Works
 
-```text
-Gemini-Retail-Agent/
-├── main.py
-├── outputs/
-├── info_json/
-├── requirement.txt
-└── src
-    ├── scraper/
-    ├── tools.py
-    ├── workflow.py
-    ├── nodes.py
-    ├── config.py
-    ├── state.py
-    └── logger.py
-```
-
-
-###  Project Index
-<details open>
-	<summary><b><code>FINQUANT_AGNET.GIT/</code></b></summary>
-	<details> <!-- __root__ Submodule -->
-		<summary><b>__root__</b></summary>
-		<blockquote>
-			<table>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/requirement.txt'>requirement.txt</a></b></td>
-				<td><code>Runtime dependencies</code></td>
-			</tr>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/main.py'>main.py</a></b></td>
-				<td><code>Interactive CLI entrypoint</code></td>
-			</tr>
-			</table>
-		</blockquote>
-	</details>
-	<details> <!-- src Submodule -->
-		<summary><b>src</b></summary>
-		<blockquote>
-			<table>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/logger.py'>logger.py</a></b></td>
-				<td><code>Central logging configuration</code></td>
-			</tr>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/config.py'>config.py</a></b></td>
-				<td><code>Env + directory helpers</code></td>
-			</tr>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/workflow.py'>workflow.py</a></b></td>
-				<td><code>LangGraph assembly</code></td>
-			</tr>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/tools.py'>tools.py</a></b></td>
-				<td><code>Deterministic tools + helpers</code></td>
-			</tr>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/nodes.py'>nodes.py</a></b></td>
-				<td><code>Gemini node + bindings</code></td>
-			</tr>
-			<tr>
-				<td><b><a href='https://github.com/sidlihe/FinQuant_Agnet.git/blob/master/src/state.py'>state.py</a></b></td>
-				<td><code>LangGraph AgentState</code></td>
-			</tr>
-			</table>
-		</blockquote>
-	</details>
-</details>
+1. **Tell us the stock** (any name - "tcs", "reliance", "irfc")
+2. **We identify it** automatically with correct NSE ticker
+3. **Fetch live data** - fundamentals + technical charts
+4. **AI analyzes everything** and gives specific advice
+5. **Get your report** with clear action plan
 
 ---
-##  Getting Started
 
-###  Prerequisites
+## 🚀 Quick Start
 
-Before getting started with FinQuant_Agnet.git, ensure your runtime environment meets the following requirements:
+### Installation
 
-- **Programming Language:** Python
-
-
-###  Installation
-
-```sh
+```bash
+# 1. Clone the repository
 git clone https://github.com/sidlihe/FinQuant_Agnet.git
 cd FinQuant_Agnet.git
+
+# 2. Create virtual environment
 python -m venv venv
-# Linux/macOS
+
+# 3. Activate environment
+# Windows:
+.\venv\Scripts\activate
+# Mac/Linux:
 source venv/bin/activate
-# Windows
-# .\venv\Scripts\activate
+
+# 4. Install dependencies
 pip install -r requirement.txt
-cp .env.example .env  # set GOOGLE_API_KEY and optional CHROMEDRIVER_PATH
-```
 
-###  Usage
+# 5. Setup environment
+cp .env.example .env
+# Edit .env and add your GOOGLE_API_KEY
 
-```sh
-python main.py
-```
+FinQuant_Pro/
+├── main.py                 # 🎯 Main application (run this!)
+├── outputs/               # 📊 Your stock analysis reports
+├── info_json/            # 💾 Raw data files
+├── requirements.txt       # 📦 Dependencies
+└── src/
+    ├── tools.py          # 🔧 Stock data tools
+    ├── config.py         # ⚙️ Configuration
+    ├── logger.py         # 📝 Logging setup
+    └── scraper/          # 🌐 Web data collection	
 
-1. Type any Indian stock/casual alias when prompted.
-2. Confirm the detected Screener + NSE ticker (override if needed).
-3. Answer whether you already own the stock.
-4. Read/save the personalized verdict in `outputs/`; raw JSON goes to `info_json/`.
 
-###  Testing
 
-Smoke check imports and Selenium wiring:
+$ python main.py
 
-```sh
-python -m compileall src
-python src/tools.py  # optional: runs the stock verdict tool in debug mode
-```
+Which stock to analyze? 
+Stock name: tata motors
 
----
-##  Project Roadmap
+✅ Found: Tata Motors | TATAMOTORS.NS
+📊 Fetching data... (takes 10-20 seconds)
+🤔 Analyzing with AI...
 
-- [X] **`Task 1`**: <strike>Implement feature one.</strike>
-- [ ] **`Task 2`**: Implement feature two.
-- [ ] **`Task 3`**: Implement feature three.
+🎯 FINAL RECOMMENDATION:
+**VERDICT** → STRONG BUY
+**Buy Zone**: ₹950 - ₹980
+**Stop Loss**: ₹920  
+**Target**: ₹1100 - ₹1150
+**Time Frame**: 3-6 months
 
----
-
-##  Contributing
-
-- **💬 [Join the Discussions](https://github.com/sidlihe/FinQuant_Agnet.git/discussions)**: Share your insights, provide feedback, or ask questions.
-- **🐛 [Report Issues](https://github.com/sidlihe/FinQuant_Agnet.git/issues)**: Submit bugs found or log feature requests for the `FinQuant_Agnet.git` project.
-- **💡 [Submit Pull Requests](https://github.com/sidlihe/FinQuant_Agnet.git/blob/main/CONTRIBUTING.md)**: Review open PRs, and submit your own PRs.
-
-<details closed>
-<summary>Contributing Guidelines</summary>
-
-1. **Fork the Repository**: Start by forking the project repository to your github account.
-2. **Clone Locally**: Clone the forked repository to your local machine using a git client.
-   ```sh
-   git clone https://github.com/sidlihe/FinQuant_Agnet.git
-   ```
-3. **Create a New Branch**: Always work on a new branch, giving it a descriptive name.
-   ```sh
-   git checkout -b new-feature-x
-   ```
-4. **Make Your Changes**: Develop and test your changes locally.
-5. **Commit Your Changes**: Commit with a clear message describing your updates.
-   ```sh
-   git commit -m 'Implemented new feature x.'
-   ```
-6. **Push to github**: Push the changes to your forked repository.
-   ```sh
-   git push origin new-feature-x
-   ```
-7. **Submit a Pull Request**: Create a PR against the original project repository. Clearly describe the changes and their motivations.
-8. **Review**: Once your PR is reviewed and approved, it will be merged into the main branch. Congratulations on your contribution!
-</details>
-
-<details closed>
-<summary>Contributor Graph</summary>
-<br>
-<p align="left">
-   <a href="https://github.com{/sidlihe/FinQuant_Agnet.git/}graphs/contributors">
-      <img src="https://contrib.rocks/image?repo=sidlihe/FinQuant_Agnet.git">
-   </a>
-</p>
-</details>
-
----
-
-##  License
-
-This project is protected under the [SELECT-A-LICENSE](https://choosealicense.com/licenses) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
-
----
-
-##  Acknowledgments
-
-- List any resources, contributors, inspiration, etc. here.
-
----
+💾 Report saved: outputs/TATA_MOTORS_ANALYSIS_28-Nov-2025.md
